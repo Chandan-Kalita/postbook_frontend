@@ -1,19 +1,40 @@
 "use client"
-import React from 'react';
+import React, { use, useEffect } from 'react';
 import { LoginPage } from './LoginPage';
 import { FeedPage } from './FeedPage';
 import { RightSidebar } from './RightSidebar';
 import { Layout } from './Layout';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { logout, selectAppLoading, selectIsLogged, setUserAsync } from '@/lib/store/features/appSlice';
+import { LoadingSpinner } from './Spinner';
 
 const SocialApp = () => {
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+    const isLogin = useAppSelector(selectIsLogged);
+    const isAppLoading = useAppSelector(selectAppLoading)
+    const dispatch = useAppDispatch()
+    useEffect(() => {
+        const token = localStorage.getItem("jwt_token")
+        if (!token) {
+            dispatch(logout())
+            return
+        }
+        dispatch(setUserAsync(token))
+    }, [])
 
-    if (!isLoggedIn) {
-        return <LoginPage setLoginStatus={setIsLoggedIn} />;
+    useEffect(() => {
+    }, [isLogin, isAppLoading])
+
+
+    if (isAppLoading) {
+        return <div className='h-[100vh] w-[100vw] flex justify-center items-center'><LoadingSpinner /></div>
+    }
+
+    if (!isLogin) {
+        return <LoginPage />;
     }
 
     return (
-        <Layout setLoginStatus={setIsLoggedIn}>
+        <Layout>
             <div className="flex-grow">
                 <FeedPage />
             </div>

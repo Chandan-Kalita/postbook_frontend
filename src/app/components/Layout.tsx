@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReactNode } from 'react';
 import { NotificationPanel } from './Notification/NotificationPanel';
+import { useAppDispatch } from '@/lib/store/hooks';
+import { logout, logoutAsync } from '@/lib/store/features/appSlice';
 
 // Main Layout Component
-export const Layout: React.FC<{ children: ReactNode, setLoginStatus: (status: boolean) => void }> = ({ children, setLoginStatus }) => {
+export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const dispatch = useAppDispatch()
     return (
         <div className="min-h-screen bg-gray-50">
             <header className="bg-white border-b">
@@ -17,7 +20,7 @@ export const Layout: React.FC<{ children: ReactNode, setLoginStatus: (status: bo
                         <Avatar className="w-8 h-8">
                             <AvatarFallback>JD</AvatarFallback>
                         </Avatar>
-                        <Button variant="ghost" onClick={() => { setLoginStatus(false) }}>Logout</Button>
+                        <Button variant="ghost" onClick={() => { dispatch(logoutAsync()) }}>Logout</Button>
                     </div>
                 </div>
             </header>
