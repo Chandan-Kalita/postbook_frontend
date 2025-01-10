@@ -4,6 +4,8 @@ import { createAppSlice } from "../createAppSlice";
 interface AppState {
     user: {
         username: string;
+        name: string | null,
+        id: string
     } | null;
     isLogged: boolean;
     token: string | null;
@@ -19,6 +21,9 @@ export const appSlice = createAppSlice({
     name: 'app',
     initialState,
     reducers: (create) => ({
+        setUser: create.reducer((state, action: PayloadAction<{ user: AppState['user'] }>) => {
+            state.user = action.payload.user
+        }),
         logout: create.reducer((state) => {
             localStorage
             state.user = null;
@@ -72,7 +77,8 @@ export const appSlice = createAppSlice({
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        "Accept": "application/json"
+                        "Accept": "application/json",
+
                     },
                     body: JSON.stringify({ username, password }),
                 });
@@ -82,7 +88,7 @@ export const appSlice = createAppSlice({
                 }
 
                 const data = await response.json();
-                thunkApi.dispatch(setUserAsync(data.token))
+                thunkApi.dispatch(setUser(data.token))
                 return data
             },
             {
@@ -99,14 +105,54 @@ export const appSlice = createAppSlice({
                 },
                 rejected: (state, action: any) => {
                     state.loading = false;
-                    alert(action.payload.error);
+                    alert(action.payload?.error || "An error occurred");
+                }
+            }
+        ),
+        updateProfile: create.asyncThunk(
+            async ({ name }: { name: string }, thunkApi) => {
+                const state = thunkApi.getState() as { app: AppState }
+                const response = await fetch('http://localhost:3001/api/user/profile', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${state.app.token}`
+
+                    },
+                    body: JSON.stringify({ name }),
+                });
+                if (response.status !== 200) {
+                    const error = await response.json()
+                    return thunkApi.rejectWithValue(error)
+                }
+
+                const data = await response.json();
+                thunkApi.dispatch(setUser({ user: data }))
+                return data
+            },
+            {
+                pending: (state) => {
+                    state.loading = true;
+                },
+                fulfilled: (state, action) => {
+                    console.log(action.payload);
+
+                    state.loading = false;
+                    // state.isLogged = true;
+                    // state.token = action.payload.token;
+
+                },
+                rejected: (state, action: any) => {
+                    state.loading = false;
+                    alert(action.payload?.error || "An error occurred");
                 }
             }
         ),
     }),
 });
 
-export const { setUserAsync, logout, login, logoutAsync } = appSlice.actions;
+export const { setUserAsync, logout, login, logoutAsync, setUser, updateProfile } = appSlice.actions;
 
 export default appSlice.reducer;
 

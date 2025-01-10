@@ -1,15 +1,25 @@
 "use client"
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReactNode } from 'react';
 import { NotificationPanel } from './Notification/NotificationPanel';
-import { useAppDispatch } from '@/lib/store/hooks';
-import { logout, logoutAsync } from '@/lib/store/features/appSlice';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { logout, logoutAsync, selectUser, updateProfile } from '@/lib/store/features/appSlice';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 // Main Layout Component
 export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
     const dispatch = useAppDispatch()
+    const user = useAppSelector(selectUser)
+    const [openNameChangeModal, setOpenNameChangeModal] = useState(false)
+    useEffect(() => {
+        if (!user?.name) {
+            setOpenNameChangeModal(true)
+        }
+    }, [user])
     return (
         <div className="min-h-screen bg-gray-50">
             <header className="bg-white border-b">
@@ -21,6 +31,7 @@ export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
                             <AvatarFallback>JD</AvatarFallback>
                         </Avatar>
                         <Button variant="ghost" onClick={() => { dispatch(logoutAsync()) }}>Logout</Button>
+                        <NameChangeDialog openNameChangeModal={openNameChangeModal} />
                     </div>
                 </div>
             </header>
@@ -31,3 +42,35 @@ export const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
         </div>
     );
 };
+
+export const NameChangeDialog = ({ openNameChangeModal, setModelOpen }: { openNameChangeModal: boolean, setModelOpen?: (v: boolean) => void }) => {
+    const dispatch = useAppDispatch()
+    const user = useAppSelector(selectUser)
+    const [name, setName] = useState(user?.name)
+
+    const handleSubmit = () => {
+        if (!name) return
+        dispatch(updateProfile({ name: name }))
+    }
+    return <Dialog open={openNameChangeModal} onOpenChange={(v) => { setModelOpen?.(v) }}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Edit profile</DialogTitle>
+                <DialogDescription>
+                    Make changes to your profile here. Click save when you're done.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                        Name
+                    </Label>
+                    <Input id="name" value={name || ""} onChange={(e) => { setName(e.target.value) }} className="col-span-3" />
+                </div>
+            </div>
+            <DialogFooter>
+                <Button onClick={handleSubmit} type="submit">Save changes</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+}
