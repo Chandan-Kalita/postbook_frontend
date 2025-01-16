@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -8,16 +8,23 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, } from "@/components/ui/avatar";
-import { useAppSelector } from '@/lib/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
 import { selectUser } from '@/lib/store/features/appSlice';
 import { NameChangeDialog } from './Layout';
+import { setUserSuggestions } from '@/lib/store/features/userSlice/userSlice';
+import { FollowingsPanel } from './Sheets/FollowingsPanel';
+import { FollowersPanel } from './Sheets/FollowersPanel';
 
 
 // User Profile Sidebar
 export const ProfileSidebar = () => {
     const user = useAppSelector(selectUser)
     const [openNameChangeModal, setOpenNameChangeModal] = useState(false)
+    const dispatch = useAppDispatch()
 
+    useEffect(() => {
+        dispatch(setUserSuggestions())
+    }, [])
     return (
         <Card className="w-64 h-fit">
             <CardHeader>
@@ -31,14 +38,8 @@ export const ProfileSidebar = () => {
             </CardHeader>
             <CardContent>
                 <div className="flex justify-around text-center">
-                    <div>
-                        <div className="font-semibold">120</div>
-                        <div className="text-sm text-gray-500">Following</div>
-                    </div>
-                    <div>
-                        <div className="font-semibold">1.2k</div>
-                        <div className="text-sm text-gray-500">Followers</div>
-                    </div>
+                    <FollowingsPanel />
+                    <FollowersPanel />
                 </div>
             </CardContent>
             <CardFooter>

@@ -1,12 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { counterSlice } from './features/counterSlice'
-import { appSlice } from './features/appSlice'
+import counterSlice from './features/counterSlice'
+import appSlice from './features/appSlice'
+import postSlice from './features/postSlice/postSlice'
+import userSlice from './features/userSlice/userSlice'
 
 export const makeStore = () => {
     return configureStore({
         reducer: {
-            counter: counterSlice.reducer,
-            app: appSlice.reducer
+            counter: counterSlice,
+            app: appSlice,
+            post: postSlice,
+            user: userSlice
         },
     })
 }

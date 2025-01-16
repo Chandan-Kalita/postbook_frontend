@@ -2,17 +2,22 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAppDispatch } from '@/lib/store/hooks';
+import { follow } from '@/lib/store/features/userSlice/userSlice';
 
 
 export interface SuggestedUserCardProps {
     username: string;
     fullName: string;
     mutualFriends: number;
+    id: string
 }
 
-export const SuggestedUserCard: React.FC<SuggestedUserCardProps> = ({ username, fullName, mutualFriends }) => {
-    const [isFollowing, setIsFollowing] = React.useState(false);
-
+export const SuggestedUserCard: React.FC<SuggestedUserCardProps> = ({ username, fullName, mutualFriends, id }) => {
+    const dispatch = useAppDispatch()
+    function handleFollow(user_id: string) {
+        dispatch(follow({ user_id }))
+    }
     return (
         <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-3">
@@ -28,11 +33,11 @@ export const SuggestedUserCard: React.FC<SuggestedUserCardProps> = ({ username, 
                 </div>
             </div>
             <Button
-                variant={isFollowing ? "outline" : "default"}
+                variant={"default"}
                 size="sm"
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={() => handleFollow(id)}
             >
-                {isFollowing ? 'Following' : 'Follow'}
+                Follow
             </Button>
         </div>
     );

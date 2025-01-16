@@ -1,17 +1,20 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
 
-interface AppState {
-    user: {
-        username: string;
-        name: string | null,
-        id: string
-    } | null;
+
+export interface IUser {
+    username: string;
+    name: string | null,
+    id?: string
+}
+
+export interface IAppState {
+    user: IUser | null;
     isLogged: boolean;
     token: string | null;
     loading: boolean;
 }
-const initialState: AppState = {
+const initialState: IAppState = {
     user: null,
     isLogged: false,
     token: null,
@@ -21,7 +24,7 @@ export const appSlice = createAppSlice({
     name: 'app',
     initialState,
     reducers: (create) => ({
-        setUser: create.reducer((state, action: PayloadAction<{ user: AppState['user'] }>) => {
+        setUser: create.reducer((state, action: PayloadAction<{ user: IAppState['user'] }>) => {
             state.user = action.payload.user
         }),
         logout: create.reducer((state) => {
@@ -88,7 +91,7 @@ export const appSlice = createAppSlice({
                 }
 
                 const data = await response.json();
-                thunkApi.dispatch(setUser(data.token))
+                thunkApi.dispatch(setUserAsync(data.token))
                 return data
             },
             {
@@ -111,7 +114,7 @@ export const appSlice = createAppSlice({
         ),
         updateProfile: create.asyncThunk(
             async ({ name }: { name: string }, thunkApi) => {
-                const state = thunkApi.getState() as { app: AppState }
+                const state = thunkApi.getState() as { app: IAppState }
                 const response = await fetch('http://localhost:3001/api/user/profile', {
                     method: 'PATCH',
                     headers: {
@@ -159,10 +162,10 @@ export default appSlice.reducer;
 /**
  * Selectors
  */
-export const selectUser = (state: { app: AppState }) => state.app.user;
+export const selectUser = (state: { app: IAppState }) => state.app.user;
 
-export const selectIsLogged = (state: { app: AppState }) => state.app.isLogged;
+export const selectIsLogged = (state: { app: IAppState }) => state.app.isLogged;
 
-export const selectToken = (state: { app: AppState }) => state.app.token;
+export const selectToken = (state: { app: IAppState }) => state.app.token;
 
-export const selectAppLoading = (state: { app: AppState }) => state.app.loading;
+export const selectAppLoading = (state: { app: IAppState }) => state.app.loading;

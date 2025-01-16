@@ -1,5 +1,5 @@
 "use client"
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -7,16 +7,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SuggestedUserCard } from './SuggestedUserCard';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { selectUserSuggestions, setUserSuggestions } from '@/lib/store/features/userSlice/userSlice';
 
 
 export const PeopleSuggestions = () => {
-    const suggestedUsers = [
-        { username: 'alex_smith', fullName: 'Alex Smith', mutualFriends: 5 },
-        { username: 'emma_wilson', fullName: 'Emma Wilson', mutualFriends: 3 },
-        { username: 'james_brown', fullName: 'James Brown', mutualFriends: 2 },
-        { username: 'lisa_parker', fullName: 'Lisa Parker', mutualFriends: 7 },
-        { username: 'mark_davis', fullName: 'Mark Davis', mutualFriends: 1 }
-    ];
+    const dispatch = useAppDispatch()
+    const suggestedUsers = useAppSelector(selectUserSuggestions)
+    useEffect(() => {
+        dispatch(setUserSuggestions())
+    }, [])
 
     return (
         <Card className="w-64">
@@ -30,7 +30,10 @@ export const PeopleSuggestions = () => {
                 {suggestedUsers.map((user) => (
                     <SuggestedUserCard
                         key={user.username}
-                        {...user}
+                        username={user.username}
+                        fullName={user.name || ""}
+                        id={user.id || ""}
+                        mutualFriends={0}
                     />
                 ))}
             </CardContent>
